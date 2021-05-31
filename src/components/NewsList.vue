@@ -29,7 +29,7 @@ export default {
         singleNews(news) {
             this.$router.push({
                 name: "SingleNews",
-                params: { news: news }
+                params: { news: news.id }
             });
         },
     },

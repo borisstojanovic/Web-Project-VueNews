@@ -41,7 +41,7 @@ export default {
             if(this.count <= (this.page-1)*this.size){
                 this.page = 1;
             }
-            this.$axios.get(`/read/news/tag/page/${this.category}`, {params: {
+            this.$axios.get(`/read/news/tag/page/${this.tag}`, {params: {
                     start: this.page-1,
                     size: this.size
                 }}).then((response) => {

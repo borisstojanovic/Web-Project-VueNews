@@ -3,7 +3,7 @@
         <h1>{{news.title}}</h1>
         <h5>{{category}}</h5>
         <p>{{news.text | shortText}}</p>
-        <span style="color: gray">Created at: {{new Date(news.createdAt) | formatDate}}</span>
+        <span style="color: gray">Created at: {{new Date(news.createdAt) | formatDate}}   |   {{news.views}} views</span>
     </div>
 </template>
 

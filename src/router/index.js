@@ -38,7 +38,7 @@ const routes = [
     component: () => import('../views/MostViewed.vue')
   },
   {
-    path: '/singleNews',
+    path: '/singleNews/:news',
     name: 'SingleNews',
     params: true,
     component: () => import('../views/SingleNews.vue')

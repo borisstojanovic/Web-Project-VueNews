@@ -1,19 +1,15 @@
 <template>
     <b-container fluid="true">
-        <div class="container" style="margin-top: 2em">
+        <div v-if="news" class="container" style="margin-top: 2em">
             <div class="row">
                 <div class="jumbotron" style="width:100%">
                     <h1 class="display-3">
                         {{news.title}}
                     </h1>
-                    <h4 class="display-6">{{category.name}}</h4>
-                    <h4 class="display-6">Author: {{user.firstName}} {{user.lastName}}</h4>
-                    <p class="lead">
-                        {{new Date(news.createdAt)|formatDate}}
-                    </p>
-                    <p>
-                        <b-badge class="rounded-pill text-black-50" v-for="tag in tags" :key="tag.id" @click="newsForTag(tag)">|{{tag.keyword}}|</b-badge>
-                    </p>
+                    <h4 v-if="category!==undefined && category!==null" class="display-6">{{category.name}}</h4>
+                    <h4 v-if="user!==undefined && user!==null" class="display-6">Author: {{user.firstName}} {{user.lastName}}</h4>
+                    <p class="lead">{{new Date(news.createdAt)|formatDate}}   |   {{news.views}} views</p>
+                    <p><span class="rounded-pill" style="cursor: pointer; margin-right: 2px; color: darkblue" v-for="tag in tags" :key="tag.id" @click="newsForTag(tag)">|{{tag.keyword}}|</span></p>
                     <hr class="my-4" />
                     <div class="post_body">
                         <p>{{news.text}}</p>
@@ -53,6 +49,7 @@ export default {
     components: {CommentList},
     data(){
         return {
+            newsId: 0,
             news: null,
             tags: [],
             user: null,
@@ -65,13 +62,32 @@ export default {
         }
     },
     beforeMount() {
-        this.news = this.$route.params.news;
-        this.getTags();
-        this.getUser();
-        this.getCategory();
-        this.getComments();
+        this.newsId = this.$route.params.news;
+        // eslint-disable-next-line no-unused-vars
+        this.getNews(this.newsId).then(response => {
+            this.getTags();
+            this.getUser();
+            this.getCategory();
+            this.getComments();
+        })
+    },
+    mounted(){
+        this.$axios.put(`/read/news/views/${this.newsId}`).catch(err => {
+            console.log(err.response.data.message);
+        })
     },
     methods: {
+        getNews(newsId){
+            return new Promise((resolve, reject) => {
+                this.$axios.get(`/read/news/${newsId}`).then(response => {
+                    this.news = response.data;
+                    resolve(this.news);
+                }).catch(err => {
+                    alert(err.message)
+                    reject(err);
+                })
+            })
+        },
         getTags(){
             this.$axios.get(`/read/tags/news/${this.news.id}`).then(response => {
                 this.tags = response.data;
@@ -103,6 +119,14 @@ export default {
         getComments(){
             this.$axios.get(`/read/comments/${this.news.id}`).then(response => {
                 this.comments = response.data;
+            })
+        },
+        newsForTag(tag){
+            this.$router.push({
+                name: "NewsForTag",
+                params: {
+                    tagId: tag.id
+                }
             })
         }
     }
