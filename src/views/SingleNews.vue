@@ -33,6 +33,18 @@
                 </form>
             </div>
             <CommentList :comments="comments"></CommentList>
+            <b-pagination
+                v-model="page"
+                :total-rows="count"
+                :per-page="size"
+                @input="getComments"
+            ></b-pagination>
+            <div class="row">
+                <div class="col-md-4">
+                    <b-form-select v-model="size" :options="sizes" @input="getComments"></b-form-select>
+                </div>
+            </div>
+
         </div>
     </b-container>
 </template>
@@ -58,7 +70,11 @@ export default {
                 author: "",
                 text: ""
             },
-            comments: []
+            comments: [],
+            page: 1,
+            size: 10,
+            count: 0,
+            sizes: [5, 10, 15]
         }
     },
     beforeMount() {
@@ -111,15 +127,28 @@ export default {
                 author: this.comment.author,
                 text: this.comment.text,
                 createdAt: new Date()
+                // eslint-disable-next-line no-unused-vars
             }).then(response =>{
-                this.comments.push(response.data);
+                //this.comments.unshift(response.data);
+                //this.comments.pop();
+                this.getComments()
                 this.comment = {}
+            }).catch(err => {
+                console.log(err)
+                alert(err.response.data.message);
             });
         },
         getComments(){
-            this.$axios.get(`/read/comments/${this.news.id}`).then(response => {
-                this.comments = response.data;
-            })
+            if(this.count <= (this.page-1)*this.size){
+                this.page = 1;
+            }
+            this.$axios.get(`/read/comments/page/${this.newsId}`, {params: {
+                    start: this.page-1,
+                    size: this.size
+                }}).then((response) => {
+                this.count = response.data.count;
+                this.comments = response.data.data;
+            });
         },
         newsForTag(tag){
             this.$router.push({
